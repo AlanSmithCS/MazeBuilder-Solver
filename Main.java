@@ -51,7 +51,7 @@ public class Main {
 
         public static final type default_Node = new type("Default", Color.DARK_GRAY);
         public static final type start_Node = new type("Start", Color.ORANGE);
-        public static final type path_Node = new type("Path", Color.WHITE);
+        public static final type path_Node = new type("Path", Color.BLUE);
         public static final type end_Node = new type("End", Color.GREEN);
         public Color colour;
         public String id;
@@ -179,7 +179,7 @@ public class Main {
         }
 
         JFrame fr = new JFrame();
-        fr.setBounds(10, 10, 20+(grid_size_x*Grid[0][0].size_x)+((grid_size_x-1)*15), 50+(grid_size_y*Grid[0][0].size_y)+((grid_size_y-1)*15));
+        fr.setBounds(10, 10, 20+(grid_size_x*Grid[0][0].size_x)+((grid_size_x)*15), 42+(grid_size_y*Grid[0][0].size_y)+((grid_size_y)*15));
         fr.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Maze creation algorithm
@@ -243,7 +243,7 @@ public class Main {
             newLabel.setForeground(Color.WHITE);
             fr.add(newLabel);
         }
-
+        fr.setBackground(Color.BLACK);
         fr.add(pn);
         fr.setVisible(true);
         System.out.println("\nDisplayed Successfully.");
