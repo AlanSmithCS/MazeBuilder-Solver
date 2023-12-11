@@ -166,8 +166,8 @@ public class Main {
             for (int column=0; column<grid_size_x; column++) {
                 //Node ID
                 String Node_ID = intToAlphabet(column+1) + row;
-                int x_coordinate = 10 + column*40;
-                int y_coordinate = 10 + row*40;
+                int x_coordinate = 10 + column*35;
+                int y_coordinate = 10 + row*35;
                 Grid[row][column] = new cNode(Node_ID, x_coordinate, y_coordinate);
             }
         }
@@ -194,7 +194,7 @@ public class Main {
         }
 
         JFrame fr = new JFrame();
-        fr.setBounds(10, 10, 20+(grid_size_x*Grid[0][0].size_x)+((grid_size_x-1)*40), 20+(grid_size_y*Grid[0][0].size_y)+((grid_size_y-1)*40));
+        fr.setBounds(10, 10, 20+(grid_size_x*Grid[0][0].size_x)+((grid_size_x-1)*15), 50+(grid_size_y*Grid[0][0].size_y)+((grid_size_y-1)*15));
         fr.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Maze creation algorithm
