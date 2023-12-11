@@ -3,19 +3,6 @@ import java.awt.geom.Line2D;
 import javax.swing.*;
 import java.util.Random; // for Pseudorandom numbers
 
-/*
-    Algorithm to find how to colour a map using 3 colours:
-
-    1. Assign a random colour to the state with the most borders
-    2. Pick a one of the countries that neighbor it with the least amount of neighbors
-        a. Assign it one of the 2 remaining colours
-        b. Pick a country that borders it with 2 coloured neighbors and is uncoloured
-        loop back to a until there are no bordering countries that are uncoloured
-    3. loop through all countries and check if they are coloured
-            if not coloured, pick one of the remaining colours left by its neighbors
-                if no neighbors, assign first colour option in list/array of colours
-*/
-
 public class Main {
     private static String intToAlphabet(int i) {
         if (i > 0 && i < 27) {
@@ -35,14 +22,10 @@ public class Main {
                 y = y_component;
             }
         }
-        public static final dir UP_LEFT = new dir(-1,-1);
         public static final dir UP = new dir(0,-1);
-        public static final dir UP_RIGHT = new dir(1,-1);
         public static final dir LEFT = new dir(-1,0);
         public static final dir RIGHT = new dir(1,0);
-        public static final dir DOWN_LEFT = new dir(-1,1);
         public static final dir DOWN = new dir(0,1);
-        public static final dir DOWN_RIGHT = new dir(1,1);
         public static final dir[] directions_arr = {UP, LEFT, RIGHT, DOWN};
 
         public static dir opposite(dir direction) {
@@ -58,21 +41,20 @@ public class Main {
     }
     public static class cNode {
         public static class type {
-            String id="default";
-            public type(String type_name) {
+            String id;
+            Color colour;
+            public type(String type_name, Color type_colour) {
                 id = type_name;
+                colour = type_colour;
             }
         }
-        public final Color uncoloured = Color.DARK_GRAY;
-        public final Color coloured = Color.ORANGE;
-        public char type;
-        /*
-        S: Start
-        E: End
-        R: Room
-         */
+
+        public static final type default_Node = new type("Default", Color.DARK_GRAY);
+        public static final type start_Node = new type("Start", Color.ORANGE);
+        public static final type end_Node = new type("End", Color.GREEN);
         public Color colour;
         public String id;
+        public type n_type;
         public final int x, y, size_x, size_y;
         public cNode[] Bordering;
         public directions.dir[] BorderDirs; // Border directions
@@ -84,8 +66,8 @@ public class Main {
             y = y_coordinate;
             size_x = 20;
             size_y = 20;
-            colour =  uncoloured;
-            type = 'R';
+            n_type = default_Node;
+            colour =  n_type.colour;
         }
         public void setBordering(cNode[] arr) {
             Bordering = arr;
@@ -198,18 +180,19 @@ public class Main {
         fr.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Maze creation algorithm
-        boolean coloured = false;
-        cNode start_Node = Grid[grid_size_y/2][grid_size_x/2];
-        start_Node.setColour(start_Node.coloured);
+        boolean generated = false;
+        cNode begin_node = Grid[grid_size_y/2][grid_size_x/2];
+        begin_node.n_type = cNode.start_Node;
+        begin_node.setColour(begin_node.n_type.colour);
 
-        System.out.println("\nStart Node: "+start_Node.id+"| Neighboring:");
-        for (cNode Border : start_Node.Bordering) {
+        System.out.println("\nStart Node: "+begin_node.id+"| Neighboring:");
+        for (cNode Border : begin_node.Bordering) {
             System.out.print(" "+Border.id);
         }
 
-        cNode current_Node = start_Node;
+        cNode current_Node = begin_node;
         /*
-        while(!coloured) {
+        while(!generated) {
             if (current_Node.UnvisitedBordering.length != 0) {
                 cNode next_state = current_Node.UnvisitedBordering[0];
                 for (cNode bordering : current_Node.UnvisitedBordering) {
@@ -219,7 +202,7 @@ public class Main {
                 }
                 current_Node = next_state;
             } else {
-                coloured = true;  // end the while loop
+                generated = true;  // end the while loop
             }
         }
          */
