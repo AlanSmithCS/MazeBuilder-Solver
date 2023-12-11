@@ -51,6 +51,7 @@ public class Main {
 
         public static final type default_Node = new type("Default", Color.DARK_GRAY);
         public static final type start_Node = new type("Start", Color.ORANGE);
+        public static final type path_Node = new type("Path", Color.WHITE);
         public static final type end_Node = new type("End", Color.GREEN);
         public Color colour;
         public String id;
@@ -103,7 +104,7 @@ public class Main {
                 state.BorderVisited(this);
             }
         }
-
+        /*
         public cNode[] findBorders(cNode[][] grid, int row, int column) {
             int numRows = grid.length;
             int numCols = grid[0].length;
@@ -136,11 +137,12 @@ public class Main {
 
             return validNeighbors;
         }
+         */
     }
 
     public static void main(String[] args) {
         // Create Nodes
-        final int grid_size_x = 20; // Max 26
+        final int grid_size_x = 20; // Max 26 (due to letters in the alphabet)
         final int grid_size_y = 20;
 
         cNode[][] Grid = new cNode[grid_size_y][grid_size_x];
@@ -157,7 +159,8 @@ public class Main {
         for (int row=0; row<grid_size_y; row++) {
             for (int column=0; column<grid_size_x; column++) {
                 //Borders
-                cNode[] Borders = Grid[row][column].findBorders(Grid, row, column);
+                //cNode[] Borders = Grid[row][column].findBorders(Grid, row, column);
+                cNode[] Borders = {};
                 Grid[row][column].setBordering(Borders);
             }
         }
