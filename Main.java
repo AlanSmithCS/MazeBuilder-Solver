@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.geom.Line2D;
 import javax.swing.*;
+import java.util.Random; // for Pseudorandom numbers
 
 /*
     Algorithm to find how to colour a map using 3 colours:
@@ -42,10 +43,34 @@ public class Main {
         public static final dir DOWN_LEFT = new dir(-1,1);
         public static final dir DOWN = new dir(0,1);
         public static final dir DOWN_RIGHT = new dir(1,1);
+        public static final dir[] directions_arr = {UP, LEFT, RIGHT, DOWN};
+
+        public static dir opposite(dir direction) {
+            int index = 0;
+            for (dir d : directions_arr) {
+                if (d == direction) {
+                    break;
+                }
+                index++;
+            }
+            return directions_arr[directions_arr.length -1 -index];
+        }
     }
     public static class cNode {
+        public static class type {
+            String id="default";
+            public type(String type_name) {
+                id = type_name;
+            }
+        }
         public final Color uncoloured = Color.DARK_GRAY;
         public final Color coloured = Color.ORANGE;
+        public char type;
+        /*
+        S: Start
+        E: End
+        R: Room
+         */
         public Color colour;
         public String id;
         public final int x, y, size_x, size_y;
@@ -57,9 +82,10 @@ public class Main {
             id = n_id;
             x = x_coordinate;
             y = y_coordinate;
-            size_x = 60;
-            size_y = 60;
+            size_x = 20;
+            size_y = 20;
             colour =  uncoloured;
+            type = 'R';
         }
         public void setBordering(cNode[] arr) {
             Bordering = arr;
@@ -77,7 +103,18 @@ public class Main {
             }
             UnvisitedBordering = tmp;
         }
-
+        public void addNeighbor(cNode visited_state, directions.dir Facing) {
+            int newlength = UnvisitedBordering.length-1; // removing one element, so one shorter
+            cNode[] tmp = new cNode[newlength];
+            int index = 0;
+            for (Main.cNode cNode : UnvisitedBordering) {
+                if (cNode != visited_state && index < tmp.length) {
+                    tmp[index] = cNode;
+                    index++;
+                }
+            }
+            UnvisitedBordering = tmp;
+        }
         public void setColour(Color newColour) {
             colour = newColour;
             for (cNode state : UnvisitedBordering) {  // Only needed for uncoloured neighbors
@@ -89,9 +126,7 @@ public class Main {
             int numRows = grid.length;
             int numCols = grid[0].length;
 
-            directions.dir[] dirs = {
-                    directions.UP, directions.RIGHT, directions.DOWN, directions.LEFT, directions.DOWN_LEFT, directions.DOWN_RIGHT, directions.UP_LEFT, directions.UP_RIGHT
-            };
+            directions.dir[] dirs = directions.directions_arr;
 
             int validNeighborCount = 0;
 
@@ -122,24 +157,24 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        final Color[] map_colours = {Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA};
         // Create Nodes
-        final int grid_size_x = 4; // Max 26
-        final int grid_size_y = 4;
+        final int grid_size_x = 20; // Max 26
+        final int grid_size_y = 20;
 
         cNode[][] Grid = new cNode[grid_size_y][grid_size_x];
         for (int row=0; row<grid_size_y; row++) {
             for (int column=0; column<grid_size_x; column++) {
-                String Node_ID = intToAlphabet(column) + row;
-                int x_coordinate = 10 + column*100;
-                int y_coordinate = 10 + row*100;
+                //Node ID
+                String Node_ID = intToAlphabet(column+1) + row;
+                int x_coordinate = 10 + column*40;
+                int y_coordinate = 10 + row*40;
                 Grid[row][column] = new cNode(Node_ID, x_coordinate, y_coordinate);
             }
         }
-
-        // Borders
-        for (int row=0; row<Grid.length; row++) {
-            for (int column=0; column<Grid[row].length; column++) {
+        // Must be done after the creation of the array, otherwise the neighbors will be null
+        for (int row=0; row<grid_size_y; row++) {
+            for (int column=0; column<grid_size_x; column++) {
+                //Borders
                 cNode[] Borders = Grid[row][column].findBorders(Grid, row, column);
                 Grid[row][column].setBordering(Borders);
             }
@@ -159,35 +194,35 @@ public class Main {
         }
 
         JFrame fr = new JFrame();
-        fr.setBounds(10, 10, 500, 500);
+        fr.setBounds(10, 10, 20+(grid_size_x*Grid[0][0].size_x)+((grid_size_x-1)*40), 20+(grid_size_y*Grid[0][0].size_y)+((grid_size_y-1)*40));
         fr.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        // Colouring algorithm
+        // Maze creation algorithm
         boolean coloured = false;
-        cNode start_state = states[0];
-        for (cNode state : states) { // find state with most borders
-            if (state.Bordering.length > start_state.Bordering.length) {
-                start_state = state;
-                System.out.println("Newstart: "+start_state.id);
-            }
-        }
-        System.out.println("\nFINAL START: "+start_state.id+"------------------\n");
-        start_state.setColour(map_colours[0]);
-        cNode current_state = start_state;
+        cNode start_Node = Grid[grid_size_y/2][grid_size_x/2];
+        start_Node.setColour(start_Node.coloured);
 
+        System.out.println("\nStart Node: "+start_Node.id+"| Neighboring:");
+        for (cNode Border : start_Node.Bordering) {
+            System.out.print(" "+Border.id);
+        }
+
+        cNode current_Node = start_Node;
+        /*
         while(!coloured) {
-            if (current_state.UnvisitedBordering.length != 0) {
-                cNode next_state = current_state.UnvisitedBordering[0];
-                for (cNode bordering : current_state.UnvisitedBordering) {
-                    if (bordering.UnvisitedBordering.length < current_state.UnvisitedBordering.length) {
+            if (current_Node.UnvisitedBordering.length != 0) {
+                cNode next_state = current_Node.UnvisitedBordering[0];
+                for (cNode bordering : current_Node.UnvisitedBordering) {
+                    if (bordering.UnvisitedBordering.length < current_Node.UnvisitedBordering.length) {
                         next_state = bordering; // update next state if bordering state has fewer uncoloured borders
                     }
                 }
-                current_state = next_state;
+                current_Node = next_state;
             } else {
                 coloured = true;  // end the while loop
             }
         }
+         */
 
 
         JPanel pn = new JPanel() {
@@ -195,9 +230,10 @@ public class Main {
             public void paint(Graphics g) {
                 Graphics2D g2=(Graphics2D)g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setStroke(new BasicStroke(5));
                 for (cNode state : states) {
                     g2.setColor(state.colour);
-                    g2.fillOval(state.x, state.y, state.size_x, state.size_y);
+                    g2.fillRect(state.x, state.y, state.size_x, state.size_y);
                     for (cNode Border : state.Bordering) {
 
                         int p1_x = state.x+state.size_x/2;
@@ -212,18 +248,11 @@ public class Main {
             }
         };
 
-        //Title
-        JLabel title = new JLabel("4 Coloured graph");
-        title.setFont(new Font("Arial", Font.BOLD, 16));
-        title.setBounds(10, 400, 500, 25);
-        title.setForeground(Color.darkGray);
-        fr.add(title);
-
         // Add State Labels (state ids)
         for (cNode state : states) {
             int padAdj = state.size_x/8 * state.id.length();// Padding adjustment depending on id length
             JLabel newLabel = new JLabel(state.id);
-            newLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            newLabel.setFont(new Font("Arial", Font.BOLD, 9));
             newLabel.setBounds(state.x+state.size_x/2-padAdj, state.y, state.size_x, state.size_y);
             newLabel.setForeground(Color.WHITE);
             fr.add(newLabel);
@@ -231,6 +260,6 @@ public class Main {
 
         fr.add(pn);
         fr.setVisible(true);
-        System.out.println("Displayed Successfully.");
+        System.out.println("\nDisplayed Successfully.");
     }
 }
